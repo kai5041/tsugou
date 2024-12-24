@@ -1,37 +1,26 @@
-PROJECT_NAME = prm
-BUILD_DIR = build
-SRC_DIR = src
-HEADER_DIR = include
+PROJECT := prm
 
-TARGET = $(BUILD_DIR)/$(PROJECT_NAME)
+SRC_DIR := src
+SRC := $(shell find $(SRC_DIR) -type f -name "*.cpp")
 
-SRC_FILES = $(shell find $(SRC_DIR) -type f -name "*.cpp")
-HEADER_FILES = $(shell find $(HEADER_DIR) -type f -name "*.hpp")
+OBJ_DIR := obj
+OBJ := $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC))
 
-OBJ_FILES = $(SRC_FILES:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
+CXX_FLAGS = --std=c++17 -O2 -Wall -Wextra -Iinclude
 
-CXXFLAGS = -I$(HEADER_DIR) -Wall -Wextra -std=c++17
+BUILD_DIR := build
+TARGET := $(BUILD_DIR)/$(PROJECT)
 
-$(TARGET): $(OBJ_FILES)
-	$(CXX) -o $(TARGET) $(OBJ_FILES) -lssl -lcrypto
+$(TARGET): $(OBJ) $(shell find include -type f -name "*.hpp")
+	@ mkdir -p $(BUILD_DIR)
+	$(CXX) $(CXX_FLAGS) $(OBJ) -o $@
 
-# Rule to compile object files
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp $(HEADER_FILES)
-	@mkdir -p $(dir $@)  # Create the directory for the object file
-	$(CXX) -c $(CXXFLAGS) -o $@ $<
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@ mkdir -p $(OBJ_DIR)
+	$(CXX) $(CXX_FLAGS) -c $< -o $@
 
-# Ensure the build directory exists
-$(BUILD_DIR):
-	@mkdir -p $(BUILD_DIR)
+run: $(TARGET)
+	@ ./$(TARGET)
 
 install: $(TARGET)
-	sudo cp $(TARGET) /usr/local/bin/$(PROJECT_NAME)
-
-install-local: $(TARGET) $(OBJ_FILES) $(HEADER_FILES)
-	@mkdir -p $(HOME)/bin
-	cp $(TARGET) $(HOME)/bin/$(PROJECT_NAME)
-
-clean:
-	rm -rf $(BUILD_DIR)
-
-.PHONY: install install-local clean
+	@ cp $(TARGET) /usr/local/bin

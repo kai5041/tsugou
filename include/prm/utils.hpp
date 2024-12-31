@@ -3,12 +3,15 @@
 
 #include <iostream>
 #include <vector>
+#include <prm/json.hpp>
+
 
 using std::cout;
 
 namespace prm {
 
 using Args = std::vector<std::string>;
+using nlohmann::json;
 
 }
 

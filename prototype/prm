@@ -3,6 +3,7 @@
 from sys import argv
 import os
 import json
+import pathlib
 
 PRM_VERSION = "1.0.0"
 
@@ -45,7 +46,26 @@ class Ctx:
         with open("branches", "w") as f:
             f.write("")
         
+    def add(self):
+        if not os.path.exists(".prm"): exit("Not a PRM project")
+
+        for arg in self.args:
+          if os.path.isdir(arg):
+              for root, dirs, files in os.walk(arg):
+                dirs = [d for d in dirs if d not in self.settings["ignores"]]
+
+                for file in files:
+                    if file not in self.settings["ignores"]:
+                        self.args.append(os.path.join(root, file))
+                
+                for directory in dirs:
+                    if directory not in self.settings["ignores"]:
+                        self.args.append(os.path.join(root, directory))
         
+        self.args = sorted(set(self.args))
+
+        print(self.args)
+
 
     def run(self):
         pass
@@ -57,6 +77,7 @@ class Ctx:
 
 commands = {
     "init": Ctx.init,
+    "add": Ctx.add,
     "run": Ctx.run,
     "version": Ctx.version
 }

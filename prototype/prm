@@ -1,0 +1,78 @@
+#!/usr/bin/python3
+
+from sys import argv
+import os
+import json
+
+PRM_VERSION = "1.0.0"
+
+class Ctx:
+    def __init__(self, args):
+        self.args = args
+        self.settings = {
+            "project_name": "",
+            "project_version": "",
+            "prm_version": "",
+            "template": "",
+            "author": "",
+            "branch": "",
+            "scripts": {},
+            "ignores": []
+        }
+
+    def set_setting(self, key, value):
+        self.settings[key] = value
+
+    def init(self):
+        self.set_setting("project_name", os.path.basename(os.getcwd()))
+        self.set_setting("prm_version", PRM_VERSION)
+        if len(self.args): self.settings["template"] = self.args[0]
+        
+        try:
+            os.mkdir(".prm")
+        except FileExistsError:
+            exit("PRM project already exists")
+
+        os.chdir(".prm")
+        os.mkdir("commits")
+
+        with open("config.json", "w") as f:
+            json.dump(self.settings, f, indent=2)
+        
+        with open("history", "w") as f:
+            f.write("")
+        
+        with open("branches", "w") as f:
+            f.write("")
+        
+        
+
+    def run(self):
+        pass
+
+    def version(self):
+        global PRM_VERSION
+        print(f"PRM version {PRM_VERSION}")
+        print(f"Github: https://github.com/kai5041/prm")
+
+commands = {
+    "init": Ctx.init,
+    "run": Ctx.run,
+    "version": Ctx.version
+}
+
+
+def main():
+    if len(argv) < 2:
+        print("Enter 'prm help' for further instructions")
+        return
+
+    command = argv[1]
+    
+    if command not in commands: exit(f"Command '{command}' not found")
+    
+    ctx = Ctx(argv[2:])
+    commands[command](ctx)
+
+if __name__ == "__main__":
+    main()

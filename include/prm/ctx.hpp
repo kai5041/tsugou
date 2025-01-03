@@ -6,7 +6,7 @@
 namespace prm {
 
 class Ctx {
-private:
+public:
   json settings = {{"project_name", ""},
                    {"project_version", ""},
                    {"prm_version", ""},
@@ -16,13 +16,11 @@ private:
                    {"scripts", json::object()},
                    {"ignores", json::array()}};
 
-public:
   Args args;
 
   Ctx(Args &&args);
   void set_setting(std::string key, std::string value);
   json get_setting(std::string key);
-
 };
 
 } // namespace prm

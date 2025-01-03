@@ -7,11 +7,22 @@ namespace prm {
 
 class Ctx {
 private:
-  json settings;
-  Args args;
+  json settings = {{"project_name", ""},
+                   {"project_version", ""},
+                   {"prm_version", ""},
+                   {"template", ""},
+                   {"author", ""},
+                   {"branch", ""},
+                   {"scripts", json::object()},
+                   {"ignores", json::array()}};
 
 public:
+  Args args;
+
   Ctx(Args &&args);
+  void set_setting(std::string key, std::string value);
+  json get_setting(std::string key);
+
 };
 
 } // namespace prm

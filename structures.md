@@ -1,5 +1,5 @@
-Everything happens inside the .prm folder
-Enter .prm folder
+Everything happens inside the .tsu folder
+Enter .tsu folder
 
 config.json file
 It contains server and user related information
@@ -9,7 +9,7 @@ config.json:
 {
   "project_name": "",
   "project_version": "",
-  "prm_version": "",
+  "tsu_version": "",
   "template": "",
   "author": "",
   "scripts": {}

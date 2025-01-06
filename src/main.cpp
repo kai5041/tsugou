@@ -1,16 +1,20 @@
 #include <tsu/core.hpp>
 
+#include <fstream>
+
 using namespace tsugou;
 
 int main(int argc, char **argv) {
-  Author author("kai", {{"github", "kai5041"}});
 
-  Commit x(tsugou::crypto::sha256("test"), author.get_username(), 0,
-           "test msg");
+  if (argc != 2) {
+    std::cerr << "Usage: tsugou <command>" << std::endl;
+    return 1;
+  }
 
-  std::cout << x.to_string() << std::endl;
+  Args args = Args(argv + 1, argv + argc);
 
-  std::cout << author.to_string() << std::endl;
+  
+
 
   return 0;
 }

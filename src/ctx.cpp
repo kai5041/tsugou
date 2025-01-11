@@ -62,8 +62,32 @@ int Ctx::init_project() {
 }
 
 int Ctx::exec_script() {
-  std::cout << "tsugou exec\n";
-  return 0;
+  std::string *cmd = nullptr;
+
+  if (args.size() == 0) {
+    std::cout << "Please enter a script name\n";
+    return 1;
+  }
+
+  for (auto script : scripts) {
+    if (script.first == args[0]) {
+      cmd = &script.second;
+      break;
+    }
+  }
+
+  if (!cmd) {
+    std::cout << "Error: script not found\n";
+    return 1;
+  }
+
+  args.erase(args.begin());
+  for (auto &arg : args) {
+    cmd->append(" ");
+    cmd->append(arg);
+  }
+
+  return system(cmd->c_str());
 }
 
 } // namespace tsugou

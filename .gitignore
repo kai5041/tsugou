@@ -1,7 +1,3 @@
-build
-obj
+env
 
-.vscode
-.cache
-
-**/.tsu/
+.tsu

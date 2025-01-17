@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+
+import click
+
+from tsugou.config import *
+from tsugou.utils import *
+
+from tsugou.user import *
+
+@click.group()
+def tsu():
+    pass
+
+
+@tsu.command()
+@click.argument("template", required=False)
+def init(template):
+    """
+    Initialize the current diretory as a tsu project
+    """
+    
+    if template:
+        print_error("Not implemented yet")
+
+    if os.path.exists(tsu_folder_name):
+        print_error(f"{tsu_folder_name} project already exists")
+
+    os.mkdir(tsu_folder_name)
+
+
+@tsu.command()
+def test():
+    pass
+
+if __name__ == "__main__":
+    tsu()

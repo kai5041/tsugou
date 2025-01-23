@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <tsugou/commands.hpp>
 #include <tsugou/ctx.hpp>
 #include <tsugou/exception.hpp>
@@ -19,11 +20,12 @@ Ctx::Ctx(const Args &args) : args(args) {
   project_path += "/.tsu";
 }
 
+std::string &Ctx::get_user_config_path() { return user_config_path; }
+std::string &Ctx::get_project_path() { return project_path; }
 Args &Ctx::get_args() { return args; }
+json &Ctx::get_config() { return config; }
 
-bool Ctx::check_project_exists() {
-  return fs::exists(project_path) && fs::is_directory(project_path);
-}
+bool Ctx::check_project_exists() { return fs::exists(project_path); }
 
 void Ctx::execute() {
   auto it = std::find_if(
@@ -36,7 +38,12 @@ void Ctx::execute() {
   const Command &cmd = *it;
 
   if (cmd.requires_project) {
-    // TODO: check if project exists
+    THROW_ERROR(!check_project_exists(),
+                "Current directory is not a tsu project");
+    THROW_ERROR(!fs::exists(get_project_path() + "/config.json"),
+                ".tsu/config.json not found")
+
+    config = json::parse(std::ifstream(get_project_path() + "/config.json"));
   }
 
   args.erase(args.begin());

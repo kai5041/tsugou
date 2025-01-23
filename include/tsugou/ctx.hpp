@@ -20,7 +20,10 @@ private:
 public:
   Ctx(const Args &args);
 
+  std::string &get_user_config_path();
+  std::string &get_project_path();
   Args &get_args();
+  json &get_config();
 
   bool check_project_exists();
 

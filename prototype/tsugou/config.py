@@ -16,3 +16,5 @@ tsu_dir = join(current_dir, tsu_folder_name)
 
 tsu_history = join(tsu_dir, "history")
 tsu_config = join(tsu_dir, "config.json")
+
+user_config_dir = os.path.expanduser("~/.config/tsu")

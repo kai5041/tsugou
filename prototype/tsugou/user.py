@@ -1,5 +1,6 @@
 class User:
-    def __init__(self, name, timezone, contacts):
+    def __init__(self, id, name, timezone, contacts):
+        self.id = id
         self.name = name
         self.timezone = timezone
         self.contacts = contacts

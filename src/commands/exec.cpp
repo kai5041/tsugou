@@ -17,5 +17,12 @@ void tsugou::execute_script(Ctx &ctx) {
 
   THROW_ERROR(command == "", "Script '" + script_name + "' not found")
 
+  ctx.get_args().erase(ctx.get_args().begin());
+
+  for (const auto &arg : ctx.get_args()) {
+    command += " ";
+    command += arg;
+  }
+
   std::exit(system(command.c_str()));
 }

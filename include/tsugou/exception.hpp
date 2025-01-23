@@ -15,7 +15,7 @@
 
 #define THROW_WARNING(condition, msg)                                          \
   if (condition) {                                                             \
-    tsugou::throw_error(msg);                                                  \
+    tsugou::throw_warning(msg);                                                  \
   }
 
 namespace tsugou {

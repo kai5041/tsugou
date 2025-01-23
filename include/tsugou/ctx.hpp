@@ -22,6 +22,8 @@ public:
 
   Args &get_args();
 
+  bool check_project_exists();
+
   void execute();
 };
 

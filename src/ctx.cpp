@@ -1,8 +1,8 @@
-#include <algorithm>
 #include <tsugou/commands.hpp>
 #include <tsugou/ctx.hpp>
 #include <tsugou/exception.hpp>
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 
@@ -21,6 +21,10 @@ Ctx::Ctx(const Args &args) : args(args) {
 
 Args &Ctx::get_args() { return args; }
 
+bool Ctx::check_project_exists() {
+  return fs::exists(project_path) && fs::is_directory(project_path);
+}
+
 void Ctx::execute() {
   auto it = std::find_if(
       tsugou::commands.begin(), tsugou::commands.end(),
@@ -30,6 +34,10 @@ void Ctx::execute() {
               "Unknown command '" + args[0] + "'");
 
   const Command &cmd = *it;
+
+  if (cmd.requires_project) {
+    // TODO: check if project exists
+  }
 
   args.erase(args.begin());
 

@@ -4,9 +4,9 @@
 #include <map>
 #include <string>
 
-namespace tsugou {
+#include <tsugou/ctx.hpp>
 
-using Contacts = std::map<std::string, std::string>;
+namespace tsugou {
 
 class User {
 private:

@@ -1,5 +1,6 @@
-#include "tsugou/exception.hpp"
 #include <cstdlib>
+
+#include <tsugou/exception.hpp>
 #include <tsugou/commands.hpp>
 
 void tsugou::execute_script(Ctx &ctx) {

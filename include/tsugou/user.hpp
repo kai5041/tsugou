@@ -10,11 +10,10 @@ using Contacts = std::map<std::string, std::string>;
 
 class User {
 private:
-  std::string username;
-  std::string timezone;
-  Contacts contacts;
-
+  std::string uuid;
+  
 public:
+  User(const std::string &uuid);
 };
 
 } // namespace tsugou

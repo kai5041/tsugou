@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "commit": "git add . && git commit -m \"Automated backup $(date -u)\" && git push origin master",
+    "configure": "mkdir -p build && cd build && cmake -G Ninja .. -Wno-dev",
+    "compile": "tsu exec configure && cd build && ninja -j$(nproc) && cd .."
+  }
+}

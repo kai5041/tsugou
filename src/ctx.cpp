@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <unistd.h>
 
 namespace tsugou {
 
@@ -24,6 +25,9 @@ std::string &Ctx::get_user_config_path() { return user_config_path; }
 std::string &Ctx::get_project_path() { return project_path; }
 Args &Ctx::get_args() { return args; }
 json &Ctx::get_config() { return config; }
+void Ctx::set_config_field(const std::string &key, const json &value) {
+  config[key] = value;
+}
 
 bool Ctx::check_project_exists() { return fs::exists(project_path); }
 
@@ -43,7 +47,8 @@ void Ctx::execute() {
     THROW_ERROR(!fs::exists(get_project_path() + "/config.json"),
                 ".tsu/config.json not found")
 
-    config = json::parse(std::ifstream(get_project_path() + "/config.json"));
+    chdir(get_project_path().c_str());
+    config = json::parse(std::ifstream("config.json"));
   }
 
   args.erase(args.begin());

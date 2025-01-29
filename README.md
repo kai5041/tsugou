@@ -1,8 +1,9 @@
 # Tsugou / 都合
-A simplified Version Control System.
-
-![Version](https://img.shields.io/badge/Version-1.0.0-blue)  
+![Version](https://img.shields.io/badge/Version-1.0.0-blue)
 ![Status](https://img.shields.io/badge/Status-Unstable-orange)  
+A simplified Version Control System.  
+
+
 
 ## Overview
 

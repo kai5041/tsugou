@@ -1,0 +1,6 @@
+#ifndef TSUGOU_VERSION_HPP
+#define TSUGOU_VERSION_HPP
+
+#define TSUGOU_VERSION "1.0.0"
+
+#endif

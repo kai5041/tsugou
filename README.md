@@ -70,4 +70,4 @@ This project is licensed under the MIT License. See the `LICENSE` file for more 
 - Discord: [Join my Discord Server](https://discord.gg/qFnH5Gqrvb)
 
 ## Donations
-(Work in progress)
+- BNB (BSC BEP20): 0x0df9c3fe3971ea1e349620b5be9046a11092c177

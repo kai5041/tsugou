@@ -1,4 +1,4 @@
-tsu help
+tsu help <<>>
 
 tsu init [template]
 

@@ -7,9 +7,13 @@ A simplified Version Control System.
 
 ## Overview
 
-**Tsugou** is a version control system designed to simplify code management.
+**Tsugou**, read from "都合" in Japanese meaning "convenience", is a version control system designed to simplify code management.
 With a focus on ease of use, security, and scalability, Tsugou provides a 
 reliable way to track changes, collaborate, and protect the integrity of your projects.
+
+**「都合」** は、コード管理を単純化するバージョン管理システムです。
+使い心地、セキュリティ、 スケーラビリティに焦点を当て、
+都合は信頼できる方法で変更の追跡、協力、そして貴方のプロジェクトの整合性を提供します 。
 
 ## Features:
 - **Version Control**:  Track and manage changes of your projects.

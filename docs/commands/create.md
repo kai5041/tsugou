@@ -1,8 +1,9 @@
 ## Syntax
 
-```bash
+```sh
 $ tsu create <project_name> [<template_name>]
 ```
+
 
 This command creates a directory named <project_name> and initializes it
 as a tsu project. If a template name is supplied (optional),
@@ -11,12 +12,12 @@ folder and decompressed into the current directory.
 
 ## Example
 
-```bash
+```sh
 $ tsu create HelloWorld cpp17_cmake
 ```
 
 
-```bash
+```sh
 $ tree
 .
 └── HelloWorld/

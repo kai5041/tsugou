@@ -6,6 +6,7 @@ A user can be structured as following:
 {
   "name": "My name",
   "user_id": "123e4567-e89b-12d3-a456-426614174000",
+  "branch": "master",
   "timezone": "Asia/Tokyo",
   "contacts": {
     "email": "myemail@mail.net",

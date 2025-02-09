@@ -13,6 +13,12 @@ namespace tsugou {
 Ctx::Ctx(const Args &args) : args(args) {
   user_config_path = std::getenv("HOME");
   user_config_path += "/.config/tsugou/";
+  config = {{"username", ""},
+            {"user_id", ""},
+            {"branch", "master"},
+            {"timezone", ""},
+            {"contacts",
+             json::object()}};
 
   if (!fs::exists(user_config_path))
     fs::create_directories(user_config_path);
@@ -54,6 +60,12 @@ void Ctx::execute() {
   args.erase(args.begin());
 
   cmd.exec(*this);
+}
+
+void Ctx::apply_changes() {
+  std::ofstream f("config.json");
+  f << config.dump(2);
+  f.close();
 }
 
 } // namespace tsugou

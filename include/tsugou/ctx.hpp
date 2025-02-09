@@ -28,6 +28,7 @@ public:
   void set_config_field(const std::string &key, const json &value);
 
   bool check_project_exists();
+  void apply_changes();
 
   void execute();
 };

@@ -24,6 +24,8 @@ Dispatcher::Dispatcher(Vec<std::string> args) : args(std::move(args)) {
                         }
                         return 0;
                       }};
+
+  commands["build-cpp"] = {"help", "Build C++17 project", build_cpp};
 }
 
 u32 Dispatcher::dispatch() {

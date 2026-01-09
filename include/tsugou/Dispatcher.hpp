@@ -14,6 +14,8 @@ struct Command {
   std::function<u32(Dispatcher &)> func;
 };
 
+u32 build_cpp(Dispatcher &);
+
 class Dispatcher {
 private:
   Vec<std::string> args;

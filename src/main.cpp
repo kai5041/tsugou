@@ -2,13 +2,10 @@
 
 #include <tsugou/Dispatcher.hpp>
 
-int main(int argc, char **argv) {
-  auto args = tsugou::Vec<std::string>({argv, argv + argc});
+int main(int argc, char** argv) {
+  auto args = tsugou::Vec<std::string>({ argv, argv + argc });
 
-  if (args.size() == 1) {
-    std::cerr << "Please provide a command." << std::endl;
-    return 1;
-  }
+  tsugou::print_err_if(args.size() == 1, "Provide a command");
 
   args.erase(args.begin());
 

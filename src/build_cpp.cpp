@@ -1,145 +1,185 @@
 #include <filesystem>
-#include <fstream>
 #include <iostream>
 #include <sstream>
-#include <string>
+#include <fstream>
 #include <unordered_map>
 #include <vector>
 #include <thread>
 #include <mutex>
+#include <atomic>
 
 #include <PicoSHA2/picosha2.h>
 #include <tsugou/Dispatcher.hpp>
 
 namespace tsugou {
 
-namespace fs = std::filesystem;
+  namespace fs = std::filesystem;
 
-static std::unordered_map<std::string, std::string>
-load_cache(const fs::path &cache_file) {
-    std::unordered_map<std::string, std::string> cache;
-    std::ifstream in(cache_file);
-    if (!in.is_open()) return cache;
+  struct CacheEntry {
+    String cmd;
+    String hash;
+  };
 
-    std::string line;
-    while (std::getline(in, line)) {
-        std::istringstream iss(line);
-        std::string path, hash;
-        if (iss >> path >> hash) cache[path] = hash;
-    }
-    return cache;
-}
+  static String sha256_file_with_cmd(const String& path, const String& cmd) {
+    std::ifstream f(path, std::ios::binary);
+    std::vector<unsigned char> h1(picosha2::k_digest_size);
+    picosha2::hash256(f, h1.begin(), h1.end());
 
-static void
-save_cache(const fs::path &cache_file,
-           const std::unordered_map<std::string, std::string> &cache) {
-    std::ofstream out(cache_file, std::ios::trunc);
-    for (const auto &[path, hash] : cache)
-        out << path << " " << hash << "\n";
-}
+    String hex1;
+    picosha2::bytes_to_hex_string(h1.begin(), h1.end(), hex1);
 
-u32 build_cpp(Dispatcher &dispatcher) {
-    u32 ret = 0;
+    std::vector<unsigned char> h2(picosha2::k_digest_size);
+    picosha2::hash256(cmd.begin(), cmd.end(), h2.begin(), h2.end());
 
-    auto args = dispatcher.get_args();
-    if (args.size() < 3) return 1;
+    String hex2;
+    picosha2::bytes_to_hex_string(h2.begin(), h2.end(), hex2);
 
-    std::string compiler = args[0];
-    fs::path folder = args[1];
-    fs::path output = args[2];
-    std::string cxx_flags = (args.size() > 3) ? args[3] : "";
-    std::string ld_flags  = (args.size() > 4) ? args[4] : "";
+    return hex1 + hex2;
+  }
 
-    if (!fs::exists(folder) || !fs::is_directory(folder)) return 1;
-
-    // Build directory for objects and target
-    fs::path build_dir = fs::current_path() / "build";
-    fs::create_directories(build_dir);
-
-    // .tsu directory for cache only
-    fs::path tsu_dir = fs::current_path() / ".tsu";
-    fs::create_directories(tsu_dir);
-    fs::path cache_file = tsu_dir / "cache";
-
-    auto cache = load_cache(cache_file);
-
-    std::vector<fs::path> to_compile;
-    std::vector<fs::path> obj_files;
-    bool target_exists = fs::exists(build_dir / output.filename());
-
-    // Gather files and check cache
-    for (auto &entry : fs::recursive_directory_iterator(folder)) {
-        if (!entry.is_regular_file() || entry.path().extension() != ".cpp") continue;
-
-        std::ifstream file(entry.path(), std::ios::binary);
-        std::vector<unsigned char> buffer((std::istreambuf_iterator<char>(file)), {});
-        std::vector<unsigned char> hash(picosha2::k_digest_size);
-        picosha2::hash256(buffer.begin(), buffer.end(), hash.begin(), hash.end());
-        std::string hex_hash = picosha2::bytes_to_hex_string(hash.begin(), hash.end());
-
-        std::string rel_path = fs::relative(entry.path(), fs::current_path()).string();
-        fs::path obj_file = build_dir / (entry.path().stem().string() + ".o");
-        obj_files.push_back(obj_file);
-
-        if (cache[rel_path] != hex_hash) {
-            to_compile.push_back(entry.path());
-            cache[rel_path] = hex_hash;
+  Vec<String> list_files_recursively(String path, String suffix) {
+    Vec<String> files;
+    try {
+      if (!fs::exists(path)) return files;
+      for (auto& entry : fs::recursive_directory_iterator(path)) {
+        if (entry.is_regular_file()) {
+          String p = entry.path().string();
+          if (p.size() >= suffix.size() &&
+            p.compare(p.size() - suffix.size(), suffix.size(), suffix) == 0) {
+            files.push_back(p);
+          }
         }
+      }
+    }
+    catch (...) {}
+    return files;
+  }
+
+  u32 build_cpp(Dispatcher& dispatcher) {
+    auto& args = dispatcher.get_args();
+
+    print_err_if(args.size() == 0, "C++ compiler missing");
+    print_err_if(args.size() == 1, "Source directory missing");
+    print_err_if(args.size() == 2, "Target file missing");
+
+    String CXX = args[0];
+    String SRC = args[1];
+    String TARGET = args[2];
+    String CXX_FLAGS = args.size() > 3 ? args[3] : "";
+    String CXX_LD_FLAGS = args.size() > 4 ? args[4] : "";
+
+    String BUILD_DIR = "build";
+    String TSU_DIR = ".tsu";
+
+    fs::create_directories(BUILD_DIR);
+    fs::create_directories(TSU_DIR);
+
+    fs::path cache_path = fs::path(TSU_DIR) / "cache";
+    std::unordered_map<String, CacheEntry> cache;
+
+    // Load cache
+    {
+      std::ifstream in(cache_path);
+      String line;
+      while (std::getline(in, line)) {
+        std::istringstream iss(line);
+        String file, cmd, hash;
+        if (!std::getline(iss, file, '|')) continue;
+        if (!std::getline(iss, cmd, '|')) continue;
+        if (!std::getline(iss, hash)) continue;
+
+        auto trim = [](String& s) {
+          while (!s.empty() && s.front() == ' ') s.erase(0, 1);
+          while (!s.empty() && s.back() == ' ') s.pop_back();
+          };
+        trim(file); trim(cmd); trim(hash);
+
+        cache[file] = { cmd, hash };
+      }
     }
 
-    // Parallel compilation
-    if (!to_compile.empty()) {
-        unsigned int n_threads = std::thread::hardware_concurrency();
-        if (n_threads == 0) n_threads = 1;
+    auto files = list_files_recursively(SRC, ".cpp");
 
-        std::mutex mtx;
-        size_t index = 0;
-        auto worker = [&]() {
-            while (true) {
-                fs::path file;
-                fs::path obj_file;
-                {
-                    std::lock_guard<std::mutex> lock(mtx);
-                    if (index >= to_compile.size()) return;
-                    file = to_compile[index];
-                    obj_file = build_dir / (file.stem().string() + ".o");
-                    index++;
-                }
-
-                std::ostringstream cmd;
-                cmd << compiler << " -c ";
-                if (!cxx_flags.empty()) cmd << cxx_flags << " ";
-                cmd << file.string() << " -o " << obj_file.string();
-
-                std::cout << cmd.str() << "\n";
-                int result = std::system(cmd.str().c_str());
-                if (result != 0) std::exit(result);
-            }
-        };
-
-        std::vector<std::thread> threads;
-        for (unsigned int i = 0; i < n_threads; ++i) threads.emplace_back(worker);
-        for (auto &t : threads) t.join();
+    Vec<String> obj_files(files.size());
+    for (size_t i = 0; i < files.size(); ++i) {
+      fs::path p(files[i]);
+      obj_files[i] = BUILD_DIR + "/" + p.stem().string() + ".o";
     }
 
-    // Linking
-    if (!to_compile.empty() || !target_exists) {
-        fs::path target_path = build_dir / output.filename();
-        std::ostringstream link_cmd;
-        link_cmd << compiler << " ";
-        for (auto &obj : obj_files) link_cmd << obj.string() << " ";
-        if (!ld_flags.empty()) link_cmd << ld_flags << " ";
-        link_cmd << "-o " << target_path.string();
+    std::atomic<size_t> index{ 0 };
+    std::atomic<u32> fail{ 0 };
+    std::mutex log_mutex;
+    std::mutex cache_mutex;
 
-        std::cout << link_cmd.str() << "\n";
-        int link_result = std::system(link_cmd.str().c_str());
-        if (link_result != 0) return link_result;
+    size_t n = std::thread::hardware_concurrency();
+    if (n == 0) n = 1;
+
+    auto worker = [&]() {
+      for (;;) {
+        size_t i = index.fetch_add(1);
+        if (i >= files.size()) break;
+
+        fs::path src_path = fs::relative(files[i], fs::current_path());
+        String src = src_path.string();
+
+        fs::path obj_path = fs::path(BUILD_DIR) / fs::path(files[i]).stem();
+        String obj = obj_path.string() + ".o";
+        obj_files[i] = obj;
+
+        String cmd = CXX + " -c " + src + " -o " + obj + " " + CXX_FLAGS;
+        String hash = sha256_file_with_cmd(src, cmd);
+
+        // Only skip if cache matches AND object exists
+        bool skip = false;
+        {
+          std::lock_guard<std::mutex> lock(cache_mutex);
+          auto it = cache.find(src);
+          if (it != cache.end() && it->second.cmd == cmd && it->second.hash == hash) {
+            if (fs::exists(obj)) skip = true;
+          }
+          if (!skip) cache[src] = { cmd, hash };
+        }
+
+        if (skip) continue;
+
+        {
+          std::lock_guard<std::mutex> lock(log_mutex);
+          print_info_if(1, cmd);
+        }
+
+        if (std::system(cmd.c_str()) != 0) {
+          fail++;
+        }
+      }
+      };
+
+    Vec<std::thread> threads;
+    for (size_t i = 0; i < n; ++i)
+      threads.emplace_back(worker);
+    for (auto& t : threads)
+      t.join();
+
+    if (fail > 0) return 1;
+
+    // Write cache
+    {
+      std::ofstream out(cache_path, std::ios::trunc);
+      for (auto& [file, entry] : cache) {
+        out << file << " | " << entry.cmd << " | " << entry.hash << "\n";
+      }
     }
 
-    save_cache(cache_file, cache);
+    // Link step
+    String link_cmd = CXX + " -o " + BUILD_DIR + "/" + TARGET;
+    for (auto& o : obj_files) link_cmd += " " + o;
+    link_cmd += " " + CXX_LD_FLAGS;
 
-    
-    return ret;
-}
+    {
+      std::lock_guard<std::mutex> lock(log_mutex);
+      print_info_if(1, link_cmd);
+    }
+
+    return std::system(link_cmd.c_str());
+  }
 
 } // namespace tsugou

@@ -8,6 +8,11 @@
 $bin="$HOME\bin"; if(-not(Test-Path $bin)){New-Item -ItemType Directory -Path $bin|Out-Null}; if(-not($env:PATH -split ";"|?{$_ -eq $bin})){[Environment]::SetEnvironmentVariable("PATH",$env:PATH+";"+$bin,"User")}; Invoke-WebRequest "https://github.com/kai5041/tsugou/releases/download/0.0.0-KBOE/tsu.exe" -OutFile (Join-Path $bin "tsu.exe")
 ```
 
+## Usage
+```sh
+$ tsu "<CXX_COMPILER>" "<SOURCE_DIR>" "<OUT_FILENAME>" "[<CXX_FLAGS>]" "[CXX_LD_FLAGS]"
+```
+
 ## License
 This project is licensed under the [MIT License](/LICENSE).
 

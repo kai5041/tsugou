@@ -1,10 +1,10 @@
-# Directories
+# In case the world falls, and Tsugou does too, this powershell script exists as an acid fallback.
+
 $srcDir = "src"
 $buildDir = "build"
 $objDir = Join-Path $buildDir "obj"
 $outputExe = Join-Path $buildDir "tsu.exe"
 
-# Compilation flags
 $flags = "-Wall -Wextra -O2 -std=c++17 -Iinclude"
 
 # Ensure build directories exist
@@ -14,7 +14,6 @@ foreach ($dir in @($buildDir, $objDir)) {
     }
 }
 
-# Get all .cpp files
 $cppFiles = Get-ChildItem -Path $srcDir -Filter *.cpp
 
 if ($cppFiles.Count -eq 0) {
@@ -24,7 +23,6 @@ if ($cppFiles.Count -eq 0) {
 
 $recompiled = @()
 
-# Compile each .cpp into .o if needed
 foreach ($file in $cppFiles) {
     $objFile = Join-Path $objDir ($file.BaseName + ".o")
     
@@ -40,7 +38,6 @@ foreach ($file in $cppFiles) {
     }
 }
 
-# Link all .o files
 $objFilesArray = Get-ChildItem -Path $objDir -Filter *.o | ForEach-Object { "`"$($_.FullName)`"" }
 $objFiles = $objFilesArray -join " "
 $linkCmd = "g++ $objFiles -o `"$outputExe`""

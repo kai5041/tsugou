@@ -12,7 +12,7 @@ $bin="$HOME\bin"; if(-not(Test-Path $bin)){New-Item -ItemType Directory -Path $b
 **Linux 11 x86_64**  
 Open the terminal and enter the following command:
 ```bash
-sudo curl -L "https://github.com/kai5041/tsugou/releases/download/0.0.1-kboe/tsu" -o /usr/local/bin/tsu && sudo chmod +x /usr/local/bin/tsu
+curl -L "https://github.com/kai5041/tsugou/releases/download/0.0.1-kboe/tsu" -o ./tsu && chmod +x ./tsu && sudo mv ./tsu /usr/local/bin/tsu
 ```
 
 Close the shell and open it. Enjoy your `tsu` command.

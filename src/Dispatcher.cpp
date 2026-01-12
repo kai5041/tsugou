@@ -9,7 +9,7 @@ namespace tsugou {
         "version",
         "Print version",
         [](Dispatcher& /*dispatcher*/) {
-          std::cout << "Tsugou 0.0.0 - \"Kai Burned Out Edition\"\n";
+          std::cout << "Tsugou 0.0.1 - \"Kai Burned Out Edition\"\n";
           std::cout << "Repository: https://github.com/kai5041/tsugou"
                     << std::endl;
           return 0;

@@ -114,6 +114,8 @@ namespace tsugou {
     size_t n = std::thread::hardware_concurrency();
     if (n == 0) n = 1;
 
+    auto start = std::chrono::high_resolution_clock::now(); // start timer
+
     auto worker = [&]() {
       for (;;) {
         size_t i = index.fetch_add(1);
@@ -178,6 +180,11 @@ namespace tsugou {
       std::lock_guard<std::mutex> lock(log_mutex);
       print_info_if(1, link_cmd);
     }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+
+    print_info_if(1, "Elapsed: " + std::to_string(duration.count()) + " us");
 
     return std::system(link_cmd.c_str());
   }

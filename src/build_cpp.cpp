@@ -184,7 +184,11 @@ namespace tsugou {
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
-    print_info_if(1, "Elapsed: " + std::to_string(duration.count()) + " us");
+print_info_if(1, 
+    "Elapsed: " + std::to_string(duration.count()) + 
+    " us | Energy used: " + 
+    std::to_string(15.0 / 0.9 * duration.count() * 1e-6) + " J"
+);
 
     return std::system(link_cmd.c_str());
   }
